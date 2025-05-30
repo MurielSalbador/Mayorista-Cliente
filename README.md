@@ -10,3 +10,5 @@ npm install @tanstack/react-query
 npm i axios
 npm i @emailjs/browser
 npm install @fortawesome/fontawesome-free
+npm install react-router-dom framer-motion
+

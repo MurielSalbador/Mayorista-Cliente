@@ -36,8 +36,8 @@ import MyOrders from "./components/pages/cart/myOrders/MyOrders.jsx";
 //mostras pedidos
 import Orders from './components/pages/OrdersClients/Orders.jsx'
 
-//provider
-// import  {ModeContext}  from "./components/context/ModeContext.jsx";
+// nueva página de detalle de producto
+import ProductDetail from './components/pages/shop/ProductDetail.jsx';
 
 
 //css
@@ -46,12 +46,13 @@ import "./App.css";
 function App() {
   return (
 
-    // <ModeContext.Provider>
+  
     <Router>
       <div className="App">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/cart" element={<CartHeader />} />
           <Route path="/finish" element={<FinishCart />} />
@@ -71,7 +72,6 @@ function App() {
         </Routes>
       </div>
     </Router>
-    // </ModeContext.Provider>
   );
 }
 

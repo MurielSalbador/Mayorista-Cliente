@@ -2,6 +2,9 @@ import { useShallow } from "zustand/shallow";
 import { useCart } from "../../../../store.js";
 import { useFilters } from "../../../../hooks/useFilters.js";
 
+//incremente el stock del producto al eliminarlo del carrito
+import { useQueryClient } from "@tanstack/react-query";
+
 export default function Cart() {
   const { count, cart, addCart, removeCart } = useCart(
     useShallow((state) => ({
@@ -12,7 +15,7 @@ export default function Cart() {
     }))
   );
 
-  const { filterProducts } = useFilters(); // aplicamos los filtros al carrito
+  const { filters, filterProducts } = useFilters();
   const filteredCart = filterProducts(cart);
 
   const totalItems = filteredCart.reduce((sum, item) => sum + item.quantity, 0);
@@ -20,6 +23,9 @@ export default function Cart() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  // Para actualizar el stock de los productos al eliminar del carrito
+  const queryClient = useQueryClient();
 
   return (
     <div className="cart">
@@ -33,7 +39,23 @@ export default function Cart() {
                 : item.title}
             </span>
             <div className="item-controls">
-              <button onClick={() => removeCart(item.id)}>-</button>
+              <button
+                onClick={() => {
+                  removeCart(item.id);
+
+                  queryClient.setQueryData(
+                    ["products", filters],
+                    (oldProducts) => {
+                      return oldProducts.map((p) =>
+                        p.id === item.id ? { ...p, stock: p.stock + 1 } : p
+                      );
+                    }
+                  );
+                }}
+              >
+                -
+              </button>
+
               <span>{item.quantity}</span>
               <button
                 onClick={() => {
