@@ -4,8 +4,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import "./Register.css";
 import ModalSuccess from "../../../modalRegister/ModalRegister.jsx";
-import BackgroundRegister from "../../../../assets/BackgroundRegister.avif";
-import RegisterImg from "../../../../assets/RegisterImg.avif";
+import RegisterImg from "../../../../assets/register/imgRegister.png";
 
 function Register() {
   const [validated, setValidated] = useState(false);
@@ -35,6 +34,8 @@ function Register() {
 
     // Verificación de validación del formulario y si las contraseñas coinciden
     if (!formIsValid || !passwordsMatch) return;
+
+console.log("Datos recibidos para registro:", formData);
 
     try {
       const res = await fetch("http://localhost:3000/api/auth/register", {
@@ -66,7 +67,6 @@ function Register() {
   return (
     <div
       className="register-background"
-      style={{ backgroundImage: `url(${BackgroundRegister})` }}
     >
       <div className="register-container">
         <div
@@ -163,7 +163,7 @@ function Register() {
             {error && <p className="text-danger text-center">{error}</p>}
 
             <div className="button-group">
-              <Button type="submit" className="custom-button-ingresar">
+              <Button type="submit" className="my-custom-button custom-button-ingresar">
                 Crear Usuario
               </Button>
             </div>

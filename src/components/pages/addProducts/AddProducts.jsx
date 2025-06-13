@@ -12,8 +12,20 @@ function ProductForm({ productId, onSuccess }) {
     stock: "",
     imageUrl: "",
     available: false,
+    categoryId: "", // 🆕 categoría
   });
+
+  const [categorias, setCategorias] = useState([]); // 🆕 categorías desde backend
+  const [newCategory, setNewCategory] = useState(""); // Añadir un estado para categoría nueva
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Obtener categorías
+    axios
+      .get("http://localhost:3000/api/categories")
+      .then((res) => setCategorias(res.data))
+      .catch((error) => console.error("Error al obtener categorías:", error));
+  }, []);
 
   useEffect(() => {
     if (productId) {
@@ -30,6 +42,7 @@ function ProductForm({ productId, onSuccess }) {
         stock: "",
         imageUrl: "",
         available: false,
+        categoryId: "",
       });
     }
   }, [productId]);
@@ -43,69 +56,99 @@ function ProductForm({ productId, onSuccess }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const priceParsed = parseFloat(parseFloat(formData.price).toFixed(2));
-    const stockParsed = Number(formData.stock);
+  const priceParsed = parseFloat(parseFloat(formData.price).toFixed(2));
+  const stockParsed = Number(formData.stock);
 
-    if (isNaN(priceParsed) || priceParsed < 0) {
-      alert("Ingrese un precio válido mayor o igual a 0");
-      return;
-    }
+  if (isNaN(priceParsed) || priceParsed < 0) {
+    alert("Ingrese un precio válido mayor o igual a 0");
+    return;
+  }
 
-    if (isNaN(stockParsed) || stockParsed < 0) {
-      alert("Ingrese un stock válido mayor o igual a 0");
-      return;
-    }
-    const payload = {
-      ...formData,
-      price: priceParsed,
-      stock: stockParsed,
-    };
+  if (isNaN(stockParsed) || stockParsed < 0) {
+    alert("Ingrese un stock válido mayor o igual a 0");
+    return;
+  }
 
-    const token = localStorage.getItem("token"); // Obtener token
+  // Aquí definimos categoryIdToSend con categoría seleccionada o nueva
+  let categoryIdToSend = formData.categoryId;
 
+  if (newCategory.trim() !== "") {
     try {
+      const token = localStorage.getItem("token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
 
-      if (productId) {
-        await axios.put(
-          `http://localhost:3000/api/products/${productId}`,
-          payload,
-          config
-        );
-        alert("✅ Producto actualizado");
-      } else {
-        await axios.post("http://localhost:3000/api/products", payload, config);
-        alert("✅ Producto agregado");
-      }
+      // Crear categoría nueva en backend
+      const res = await axios.post(
+        "http://localhost:3000/api/categories",
+        { nombre: newCategory.trim() },
+        config
+      );
 
-      setFormData({
-        title: "",
-        brand: "",
-        price: "",
-        stock: "",
-        imageUrl: "",
-        available: false,
-      });
-
-      onSuccess?.();
+      categoryIdToSend = res.data.id;
     } catch (error) {
-      console.error(error);
-      alert("❌ Error al guardar el producto");
+      alert("Error al crear la nueva categoría");
+      return;
     }
+  }
+
+  const payload = {
+    ...formData,
+    price: priceParsed,
+    stock: stockParsed,
+    categoryId: categoryIdToSend,
   };
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    if (productId) {
+      await axios.put(
+        `http://localhost:3000/api/products/${productId}`,
+        payload,
+        config
+      );
+      alert("✅ Producto actualizado");
+    } else {
+      await axios.post("http://localhost:3000/api/products", payload, config);
+      alert("✅ Producto agregado");
+    }
+
+    setFormData({
+      title: "",
+      brand: "",
+      price: "",
+      stock: "",
+      imageUrl: "",
+      available: false,
+      categoryId: "",
+    });
+    setNewCategory("");  // Limpiar el input de nueva categoría
+
+    onSuccess?.();
+  } catch (error) {
+    console.error(error);
+    alert("❌ Error al guardar el producto");
+  }
+};
 
   return (
     <div className="container-formAdd">
       <div className="contactClose">
         <CloseButton
           aria-label="Cerrar formulario"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/shop")}
         />
       </div>
 
@@ -154,6 +197,28 @@ function ProductForm({ productId, onSuccess }) {
           name="imageUrl"
           value={formData.imageUrl}
           onChange={handleChange}
+        />
+
+        <label>Categoría existente:</label>
+        <select
+          name="categoryId"
+          value={formData.categoryId}
+          onChange={handleChange}
+        >
+          <option value="">Selecciona una categoría</option>
+          {categorias.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.nombre}
+            </option>
+          ))}
+        </select>
+
+        <label>O escribe una nueva categoría:</label>
+        <input
+          type="text"
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+          placeholder="Nueva categoría"
         />
 
         <label>

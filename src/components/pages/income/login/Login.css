@@ -1,4 +1,5 @@
 .login-background {
+  background: linear-gradient(70deg, rgb(136, 65, 1), rgb(159, 81, 9));
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -17,7 +18,7 @@
   height: 700px;
 
 
-  transform: scale(0.75);
+  transform: scale(0.85);
   transform-origin: center;
   
   background-color: whitesmoke;
@@ -75,8 +76,8 @@ h3 {
   border-color: #a36c2c;
 }
 
-.my-custom-button {
-  background-color: #ce812a;
+.my-custom-button.custom-button-register {
+  background-color: rgb(149, 42, 0);
   color: #ffffff;
   font-weight: 600;
   border: none;
@@ -104,9 +105,10 @@ h3 {
   gap: 10px;
 }
 
-.custom-button-register:hover {
-  background-color: #945813;
-  border-color: #814c1a;
+.my-custom-button.custom-button-register:hover {
+  background-color: rgb(70, 23, 5) !important;
+  border-color: rgb(70, 23, 5) !important;
+  color: white !important;
 }
 
 .text-center {
@@ -134,7 +136,7 @@ h3 {
 }
 
 .custom-button-faq {
-  color: #4e3310;
+  color: rgb(126, 61, 17);
   font-weight: bold;
   text-decoration: none;
   background: none;

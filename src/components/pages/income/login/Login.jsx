@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { toast } from "react-toastify";
-import BackgroundLogin from "../../../../assets/BackgroundLogin.avif";
-import LoginImg from "../../../../assets/LoginImg.avif";
+import LoginImg from "../../../../assets/login/imgLogin.jpeg";
 import "./Login.css";
 
 function Login() {
@@ -25,41 +24,63 @@ function Login() {
 
     setValidated(true);
 
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+   try {
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    if (
+      res.status === 403 &&
+      data.error === "Este usuario está bloqueado."
+    ) {
+      toast.error("🚫 Tu cuenta ha sido bloqueada por un administrador.", {
+        position: "top-right",
+        autoClose: 4000,
+        theme: "colored",
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        // Guardar token y user en localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        toast.success("✔ Bienvenido!", {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "colored",
-        });
-
-        navigate("/");
-      } else {
-        toast.error(data.error || "❌ Contraseña o Email incorrecto", {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "colored",
-        });
-      }
-    } catch (err) {
-      toast.error("⚠️ Error en el servidor", {
+    } else {
+      toast.error(data.error || "❌ Contraseña o Email incorrecto", {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
       });
     }
+    return;
+  }
+
+  // ⚠ Verificación de cuenta
+  if (!data.user.isVerified) {
+    toast.error("📩 Verificá tu cuenta desde el correo electrónico.", {
+      position: "top-right",
+      autoClose: 3000,
+      theme: "colored",
+    });
+    return;
+  }
+
+  // Guardar token y user en localStorage
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  toast.success("✔ Bienvenido!", {
+    position: "top-right",
+    autoClose: 3000,
+    theme: "colored",
+  });
+
+  navigate("/");
+} catch (err) {
+  toast.error("⚠️ Error en el servidor", {
+    position: "top-right",
+    autoClose: 3000,
+    theme: "colored",
+  });
+}
   };
 
   const handleRegisterClick = () => {
@@ -67,10 +88,7 @@ function Login() {
   };
 
   return (
-    <div
-      className="login-background"
-      style={{ backgroundImage: `url(${BackgroundLogin})` }}
-    >
+    <div className="login-background">
       <div className="login-container">
         <div
           className="login-left"
@@ -117,7 +135,7 @@ function Login() {
             <div className="button-group">
               <Button
                 type="submit"
-                className="my-custom-button custom-button-register"
+                className="my-custom-button custom-button-register "
               >
                 Iniciar Sesión
               </Button>
@@ -134,17 +152,10 @@ function Login() {
           <div className="faq-recomendation">
             <p className="text-center">
               Si olvidaste tu contraseña, hacé click en{" "}
-              <a href="/recuperar" className="custom-button-faq">
+              <a href="/forgot-password" className="custom-button-faq">
                 Recuperarla
               </a>{" "}
               y seguí las instrucciones.
-            </p>
-
-            <p className="text-center">
-              Para más preguntas, hacé click en{" "}
-              <a href="/faq" className="custom-button-faq">
-                Preguntas Frecuentes
-              </a>
             </p>
           </div>
         </div>

@@ -1,8 +1,10 @@
+//productList.jsx
 import useProductNavigation from "../../../../hooks/useProductNavigation/useProductNavigation.js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllProducts } from "../../../../api/fakeStoreApi.js";
 import { useCart } from "../../../../store.js";
 import { useFilters } from "../../../../hooks/useFilters.js";
+import { getAdjustedStock } from "../../../../utils/calculateStock.js";
 import "./ProductList.css";
 
 export default function ProductList() {
@@ -10,6 +12,7 @@ export default function ProductList() {
   const { filters } = useFilters();
   const { goToProductDetail } = useProductNavigation();
   const addCart = useCart((state) => state.addCart);
+  const cart = useCart((state) => state.cart); // <-- esta línea es la que faltaba
   const queryClient = useQueryClient();
 
   const {
@@ -40,9 +43,11 @@ export default function ProductList() {
           <div className="product-footer">
             <p className="product-price">${product.price}</p>
 
- <p className="product-stock">Stock: {product.stock}</p>
+            <p className="product-stock">
+              Stock: {getAdjustedStock(product, cart)}
+            </p>
 
-            {product.stock === 1 && (
+            {getAdjustedStock(product, cart) === 1 && (
               <p className="stock-alert">¡Último disponible!</p>
             )}
 
@@ -51,22 +56,15 @@ export default function ProductList() {
                 <button disabled>Sin stock</button>
               ) : (
                 <button
-                  disabled={product.stock === 0}
+                  disabled={getAdjustedStock(product, cart) === 0}
                   onClick={() => {
-                    if (product.stock === 0) return;
+                    if (getAdjustedStock(product, cart) === 0) return;
                     addCart(product);
-
-                    queryClient.setQueryData(
-                      ["products", filters],
-                      (oldProducts) => {
-                        return oldProducts.map((p) =>
-                          p.id === product.id ? { ...p, stock: p.stock - 1 } : p
-                        );
-                      }
-                    );
                   }}
                 >
-                  {product.stock === 0 ? "Sin stock" : "Agregar al carrito"}
+                  {getAdjustedStock(product, cart) === 0
+                    ? "Sin stock"
+                    : "Agregar al carrito"}
                 </button>
               )}
 

@@ -11,4 +11,7 @@ npm i axios
 npm i @emailjs/browser
 npm install @fortawesome/fontawesome-free
 npm install react-router-dom framer-motion
-
+react-bootstrap-icons
+npm install aos
+npm install react-multi-carousel
+npm install react-responsive
